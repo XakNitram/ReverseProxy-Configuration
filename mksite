@@ -1,0 +1,45 @@
+#!/bin/bash
+
+PORT=80
+has_name_option=false
+while getopts ":c:p:" opt; do
+  case $opt in
+    p)
+      PORT=$OPTARG
+      ;;
+    c) 
+      has_name_option=true
+      NAME=$OPTARG
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" 1>&2
+      exit 1
+      ;;
+    :) 
+      echo "Missing argument for -$OPTARG" 1>&2
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND -1))
+
+if [ $# -eq 0 ]; then
+  echo "Missing argument for site name" 1>&2
+  exit 1
+fi
+SITE="$1"
+shift
+if [ $# -ne 0 ]; then
+  echo "Invalid arguments to mksite after site name: $@" 1>&2
+  exit 1
+fi
+
+if [ "$has_name_option" = false ]; then
+  NAME="$SITE"
+fi
+
+# Copy the template file to the 
+echo "Site: $SITE"
+echo "Name: $NAME"
+echo "Port: $PORT"
+
