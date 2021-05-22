@@ -39,6 +39,7 @@ if [ "$has_name_option" = false ]; then
 fi
 
 # ****** Copy the template file to the site folder ******
+# TODO: Set some of these values from a .env file.
 SITE_FILE="sites/$NAME.conf"
 mkdir -p sites
 cp templates/template.conf $SITE_FILE
