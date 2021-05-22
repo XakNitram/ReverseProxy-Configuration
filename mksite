@@ -7,7 +7,7 @@ while getopts ":c:p:" opt; do
     p)
       PORT=$OPTARG
       ;;
-    c) 
+    c)
       has_name_option=true
       NAME=$OPTARG
       ;;
@@ -15,7 +15,7 @@ while getopts ":c:p:" opt; do
       echo "Invalid option: -$OPTARG" 1>&2
       exit 1
       ;;
-    :) 
+    :)
       echo "Missing argument for -$OPTARG" 1>&2
       exit 1
       ;;
@@ -38,8 +38,25 @@ if [ "$has_name_option" = false ]; then
   NAME="$SITE"
 fi
 
-# Copy the template file to the 
-echo "Site: $SITE"
-echo "Name: $NAME"
-echo "Port: $PORT"
+# ****** Copy the template file to the site folder ******
+SITE_FILE="sites/$NAME.conf"
+mkdir -p sites
+cp templates/template.conf $SITE_FILE
+sed -i "s/%{SITE}%/$SITE/g" $SITE_FILE
+sed -i "s/%{NAME}%/$NAME/g" $SITE_FILE
+sed -i "s/%{PORT}%/$PORT/g" $SITE_FILE
+
+# ****** Create a certificate for the site ******
+# Customize the ext file
+NAME_PREFIX="certs/$SITE/$SITE.longshore.local"
+EXT_FILE="$NAME_PREFIX.ext"
+mkdir -p "certs/$SITE"
+cp templates/template.ext $EXT_FILE
+sed -i "s/%{SITE}%/$SITE/g" $EXT_FILE
+
+# Generate the certificate
+openssl genrsa -out "$NAME_PREFIX.key" 2048
+openssl req -new -key "$NAME_PREFIX.key" -out "$NAME_PREFIX.csr"
+openssl x509 -req -in $NAME_PREFIX.csr -CA certs/lswca.pem -CAkey certs/lswca.key -CAcreateserial -out $NAME_PREFIX.crt -days 825 -sha256 -extfile $NAME_PREFIX.ext
+
 
